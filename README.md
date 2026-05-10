@@ -1,4 +1,4 @@
-<img width="952" height="339" alt="image" src="https://github.com/user-attachments/assets/6c712ed2-b829-48a8-bbe3-7cde91668678" /># simulacoes_kali_1
+# simulacoes_kali_1
 Simulações usando Medusa e Nmap
 
 Simulações utilizando um alvo real, dentro do meu servidor
@@ -75,7 +75,7 @@ sqlmap -u "https://OCULTADO/admin/index.php" --method POST --data='{"email":"?",
 403 (Forbidden) - 120 times, 429 (Too Many Requests) - 24 times
 Aqui o servidor interrompeu as requisições
 Interessante ver o log do lado do servidor, apontando que houve a requisição pelo sqlmap
-Print em anexo
+<img width="952" height="339" alt="image" src="https://github.com/user-attachments/assets/6c712ed2-b829-48a8-bbe3-7cde91668678" />
 
 Testes usando o wpscan
 wpscan --url OCULTADO
